@@ -29,6 +29,10 @@ img {
     max-width: 100%;
     height: auto;
     border-radius: 4px;
+    /* Render HDR photos (which carry gain maps) in standard range so they
+       don't push the display into HDR mode and make the page look dimmed.
+       Supported in Chrome/Edge; Safari support is limited. */
+    dynamic-range-limit: standard;
 }
 
 /* --- Navigation Bar --- */
@@ -130,6 +134,75 @@ img {
     object-fit: cover;
 }
 
+/* Captioned image inside text pages */
+.text-figure {
+    margin: 30px 0;
+}
+
+.text-figure img {
+    width: 100%;
+    display: block;
+}
+
+.text-figure figcaption {
+    margin-top: 8px;
+    font-size: 0.9rem;
+    color: #777;
+    font-style: italic;
+    text-align: center;
+}
+
+/* Detailed in-situ caption: more space above it and left aligned */
+.text-figure figcaption.insitu-caption {
+    margin-top: 30px;
+    text-align: left;
+}
+
+
+/* Image + paragraph side by side (Poetry page) */
+.side-by-side {
+    display: flex;
+    gap: 25px;
+    align-items: flex-start;
+    margin: 20px 0;
+}
+
+.side-by-side .text-figure {
+    flex: 1;          /* image column */
+    margin: 0;
+}
+
+.side-by-side p {
+    flex: 1.4;        /* text column, a bit wider */
+    margin: 0;
+}
+
+/* Stack them on narrow screens */
+@media (max-width: 768px) {
+    .side-by-side {
+        flex-direction: column;
+    }
+}
+
+/* Inline PDF scroller (Poetry page) */
+.pdf-scroller {
+    margin: 20px 0;
+    border: 1px solid #e0e0e0;
+    border-radius: 8px;
+    overflow: hidden;
+    background: #f9f9f9;
+}
+
+.pdf-scroller iframe {
+    display: block;
+    width: 100%;
+    height: 600px;   /* contained viewer; the PDF scrolls inside it */
+    border: none;
+}
+
+.pdf-fallback {
+    font-size: 0.9rem;
+}
 
 /* --- Pop-up Window (From Before) --- */
 /* These styles are unchanged and will only apply on index.html */

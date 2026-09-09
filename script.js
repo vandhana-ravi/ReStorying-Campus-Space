@@ -4,6 +4,27 @@ document.addEventListener('DOMContentLoaded', () => {
     const popups = document.querySelectorAll('.popup-window');
     const closeButtons = document.querySelectorAll('.close-btn');
 
+    // Lazy-load embeds: only fetch an iframe the first time its popup is opened,
+    // and only while it is visible, so heavy apps (KnightLab StoryMap/Timeline)
+    // initialize at the correct size. Once loaded it stays cached for instant reopen.
+    const loadEmbeds = (popup) => {
+        popup.querySelectorAll('iframe[data-src]').forEach(iframe => {
+            if (!iframe.getAttribute('src')) {
+                iframe.setAttribute('src', iframe.dataset.src);
+            }
+        });
+    };
+
+    // Stop playback of media embeds (YouTube/Vimeo/SoundCloud) by reloading just
+    // those iframes. Non-media embeds are left cached so reopening is fast.
+    const pauseMedia = (popup) => {
+        popup.querySelectorAll('iframe[src]').forEach(iframe => {
+            if (/youtube|youtu\.be|vimeo|soundcloud/i.test(iframe.src)) {
+                iframe.src = iframe.src;
+            }
+        });
+    };
+
     areas.forEach(area => {
         area.addEventListener('click', (event) => {
             event.preventDefault(); // Prevent default link behavior
@@ -17,6 +38,9 @@ document.addEventListener('DOMContentLoaded', () => {
                 targetPopup.style.display = 'flex'; // Show the specific popup
                 // Optional: Stop body scrolling when popup is open
                 document.body.style.overflow = 'hidden';
+
+                // Load the embed now that the popup is visible (first open only).
+                loadEmbeds(targetPopup);
             }
         });
     });
@@ -29,13 +53,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 // Optional: Re-enable body scrolling
                 document.body.style.overflow = ''; 
                 
-                // Pause any playing Soundcloud widgets in this popup
-                const iframe = popupWindow.querySelector('iframe');
-                if (iframe) {
-                    // This is a simple way to "reset" or stop the player.
-                    // A more robust solution might involve the Soundcloud Player API.
-                    iframe.src = iframe.src; 
-                }
+                // Pause any playing media (YouTube/Vimeo/SoundCloud) in this popup.
+                pauseMedia(popupWindow);
             }
         });
     });
@@ -46,10 +65,7 @@ document.addEventListener('DOMContentLoaded', () => {
             if (event.target === popup) { // Check if click was directly on the background
                 popup.style.display = 'none';
                 document.body.style.overflow = '';
-                const iframe = popup.querySelector('iframe');
-                if (iframe) {
-                    iframe.src = iframe.src;
-                }
+                pauseMedia(popup);
             }
         });
     });
@@ -61,10 +77,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (popup.style.display === 'flex') {
                     popup.style.display = 'none';
                     document.body.style.overflow = '';
-                    const iframe = popup.querySelector('iframe');
-                    if (iframe) {
-                        iframe.src = iframe.src;
-                    }
+                    pauseMedia(popup);
                 }
             });
         }
